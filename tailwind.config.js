@@ -1,11 +1,72 @@
 module.exports = {
-  content: [
-    './src/components/**/*.{ts,tsx,js,jsx}', 
-    './src/pages/**/*.{ts,tsx,js,jsx}'
-  ],
-  theme: {
-    extend: {},
-  },
-  variants: {},
-  plugins: [],
-}
+	content: [
+		// "./app/**/*.{js,ts,jsx,tsx}",
+		// "./pages/**/*.{js,ts,jsx,tsx}",
+		// "./components/**/*.{js,ts,jsx,tsx}",
+		"./components/**/*.{ts,tsx,js,jsx}",
+		"./src/pages/**/*.{ts,tsx,js,jsx}",
+	],
+	theme: {
+		extend: {
+			backgroundImage: {
+				main: "linear-gradient(180deg, #FBFBFF 0%, #ECECF7 100%)",
+			},
+			colors: {
+				brand: "#1976D2",
+				primary: {
+					50: "#e8f1fa",
+					100: "#d1e3f6",
+					200: "#a3c8ed",
+					300: "#75ace4",
+					400: "#4691db",
+					500: "#134df9",
+					600: "#145ea8",
+					700: "#0f467e",
+					800: "#0a2f54",
+					900: "#05172a",
+				},
+				secondary: {
+					50: "#fff8e3",
+					100: "#ffedb7",
+					200: "#ffe289",
+					300: "#ffd85b",
+					400: "#ffcd3c",
+					500: "#ffc52d",
+					600: "#feb728",
+					700: "#fda525",
+					800: "#fc9522",
+					900: "#fb771e",
+				},
+				success: {
+					50: "#e3f7e7",
+					100: "#bdecc3",
+					200: "#8fdf9c",
+					300: "#57d372",
+					400: "#01c851",
+					500: "#00bd2b",
+					600: "#00ad20",
+					700: "#009b10",
+					800: "#008a00",
+					900: "#006a00",
+				},
+				danger: {
+					50: "#ffebef",
+					100: "#ffcdd3",
+					200: "#f5999c",
+					300: "#ed7075",
+					400: "#f94c52",
+					500: "#ff3737",
+					600: "#f02b36",
+					700: "#dd1f30",
+					800: "#d11529",
+					900: "#c2001b",
+				},
+			},
+			boxShadow: {
+				card: "0px 10px 20px 0px rgba(217,217,217,0.3)",
+			},
+		},
+	},
+	variants: {},
+	plugins: [],
+};
