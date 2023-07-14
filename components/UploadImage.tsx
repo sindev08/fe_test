@@ -38,13 +38,15 @@ export function UploadImage({
 		<div className="w-full space-y-2 file-uploader">
 			<label className="text-base font-medium text-gray-900">{name}</label>
 			{isImagePicked && (
-				<div className="relative w-8 aspect-square">
-					<Image
-						fill
-						src={URL.createObjectURL(fileImage)}
-						className="object-cover "
-						alt=""
-					/>
+				<div className="w-full p-2 border border-gray-200 rounded">
+					<div className="relative w-8 aspect-square">
+						<Image
+							fill
+							src={URL.createObjectURL(fileImage)}
+							className="object-cover "
+							alt=""
+						/>
+					</div>
 				</div>
 			)}
 			{/* {isImagePicked && type == "add" && "file telah diupload"}
@@ -55,7 +57,7 @@ export function UploadImage({
 				id="dropzone-file"
 				type="file"
 				onChange={handleFileInput}
-				className={`w-full text-sm cursor-pointer focus:outline-none text-black file:mr-4 file:py-2 file:px-3 file:rounded font-medium file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-primary-600`}
+				className={` w-full text-sm cursor-pointer mt-2 focus:outline-none text-black file:mr-4 file:py-1 file:px-2 file:rounded font-medium file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-primary-600`}
 			/>
 			<button onClick={() => fileInput.current?.click()} />
 		</div>

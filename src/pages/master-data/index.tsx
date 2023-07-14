@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Navbar } from "../../../components/Navbar";
 import { Layout } from "../../../components/Layout";
 import { GetServerSideProps } from "next";
@@ -25,6 +25,8 @@ import { ButtonOutline } from "../../../components/ButtonOutline";
 import { UploadImage } from "../../../components/UploadImage";
 import { notifyError } from "../../../components/Toast";
 import { UploadPdf } from "../../../components/UploadPdf";
+import { notifySuccess } from "../../../components/Toast";
+import CreateRuas from "../../../services/ruas/CreateRuas";
 
 export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 	const token = ctx?.req?.cookies.token;
@@ -35,55 +37,71 @@ export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 		props: {
 			dataRuas: result?.data,
 			dataUnit: result2?.data,
+			token: token,
 		},
 	};
 };
 
-export default function MasterData({ dataRuas, dataUnit }) {
+export default function MasterData({ dataRuas, dataUnit, token }) {
 	const [modal, setModal] = useState(false);
 	const [action, setAction] = useState("add");
-	const [selected, setSelected] = useState([]);
-	const [fileImage, setFileImage] = useState();
 	const [isImagePicked, setIsImagePicked] = useState(false);
 	const [isPdfPicked, setIsPdfPicked] = useState(false);
 
 	// console.log(fileImage);
 	// console.log(isImagePicked);
+	const [filePdf, setFilePdf] = useState(null);
+	const [selected, setSelected] = useState([]);
+	const status = [
+		{
+			id: 1,
+			name: "aktif",
+		},
+		{
+			id: 0,
+			name: "tidak aktif",
+		},
+	];
 
-	const [filePdf, setFilePdf] = useState();
+	const [fileImage, setFileImage] = useState(null);
+	const [ruasForm, setRuasForm] = useState<Ruas>({
+		ruasName: "",
+		longMiles: "",
+		initMiles: "",
+		lastMiles: "",
+	});
 
-	const onChangeUpload = async (e: any) => {
-		const file = e.target.files[0];
-
-		// setCandidate({ ...candidate, imageUrl: e.target.files[0] });
-		if (file.type !== "image/png") {
-			return alert("Format harus PNG");
-		}
-		if (file.size > 1024000) {
-			return alert("Ukuran file tidak boleh lebih dari 1 MB");
+	const handleAddRuas = async () => {
+		const unitIds = selected.map((unit) => unit.id); // Membuat array unitId
+		var formdata = new FormData();
+		formdata.append("unit_id", unitIds.join(","));
+		formdata.append("ruas_name", ruasForm.ruasName);
+		formdata.append("long", ruasForm.longMiles);
+		formdata.append("km_awal", ruasForm.initMiles);
+		formdata.append("km_akhir", ruasForm.lastMiles);
+		formdata.append("status", "0");
+		formdata.append("file", filePdf);
+		formdata.append("photo", fileImage);
+		if (
+			unitIds.length == 0 ||
+			ruasForm.ruasName.length == 0 ||
+			ruasForm.longMiles.length == 0 ||
+			ruasForm.initMiles.length == 0 ||
+			ruasForm.lastMiles.length == 0 ||
+			filePdf.length == 0 ||
+			fileImage.length == 0
+		) {
+			notifyError("Pastikan semuanya sudah terisi!");
 		} else {
-			console.log("berhasil", file);
-
-			// const data = new FormData();
-			// data.append("file", file);
-			// try {
-			// 	const resp = await axios.post(
-			// 		`https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/image/upload`,
-			// 		data
-			// 	);
-			// 	setImgPreview(resp.data.url);
-			// 	setCandidate({
-			// 		...candidate,
-			// 		imageUrl: resp.data.url,
-			// 		imagePublicId: resp.data.public_id,
-			// 	});
-			// } catch (err) {
-			// 	console.log("errr : ", err);
-			// }
+			console.log(formdata);
+			const result = await CreateRuas(token, formdata);
+			if (result.status) {
+				notifySuccess("Berhasil disimpan");
+			} else {
+				notifyError("Pastikan semuanya sudah terisi!");
+			}
 		}
 	};
-
-	const handleAddRuas = async () => {};
 
 	const onClickPage = async (url: string) => {
 		try {
@@ -263,7 +281,11 @@ export default function MasterData({ dataRuas, dataUnit }) {
 					<div className="flex flex-col items-center justify-center p-4 space-y-5">
 						<div className="flex flex-row items-center justify-center w-full space-x-8">
 							<div className="flex flex-col w-1/2 space-y-3">
-								<Input label={"Ruas"} placeholder={"Masukkan Ruas"} />
+								<Input
+									onChange={(e) => setRuasForm({ ...ruasForm, ruasName: e })}
+									label={"Ruas"}
+									placeholder={"Masukkan Ruas"}
+								/>
 								<Multiselect
 									name={"Unit"}
 									labelFor={"Unit Kerja"}
@@ -292,10 +314,28 @@ export default function MasterData({ dataRuas, dataUnit }) {
 								/>
 							</div>
 							<div className="flex flex-col w-1/2 space-y-3">
-								<Input label={"Ruas"} placeholder={"Masukkan Ruas"} />
-								<Input label={"Ruas"} placeholder={"Masukkan Ruas"} />
-								<Input label={"Ruas"} placeholder={"Masukkan Ruas"} />
-								<Input label={"Ruas"} placeholder={"Masukkan Ruas"} />
+								<Input
+									onChange={(e) => setRuasForm({ ...ruasForm, longMiles: e })}
+									label={"Panjang (km)*"}
+									placeholder={"Masukkan Panjang (km)"}
+								/>
+								<Input
+									label={"Km Awal*"}
+									placeholder={"Masukkan Km Awal"}
+									onChange={(e) => setRuasForm({ ...ruasForm, initMiles: e })}
+								/>
+								<Input
+									label={"Km Akhir*"}
+									placeholder={"Masukkan Km Akhir"}
+									onChange={(e) => setRuasForm({ ...ruasForm, lastMiles: e })}
+								/>
+								<select className="px-3 py-2 border-2 rounded border-brand focus:outline-none">
+									{status.map((status, i: number) => (
+										<option key={i} value={status.id}>
+											{status.name}
+										</option>
+									))}
+								</select>
 							</div>
 						</div>
 						<div className="flex justify-end w-full space-x-5">
