@@ -278,9 +278,9 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 					<XMarkIcon className="w-5 h-5 text-gray-900" />
 				</button>
 				{action === "add" && (
-					<div className="flex flex-col items-center justify-center p-4 space-y-5">
-						<div className="flex flex-row items-center justify-center w-full space-x-8">
-							<div className="flex flex-col w-1/2 space-y-3">
+					<div className="flex flex-col h-[80vh] overflow-y-auto sm:h-full items-center justify-center p-4 space-y-5">
+						<div className="flex flex-col items-center justify-center w-full space-y-3 sm:space-y-0 sm:space-x-8 sm:flex-row">
+							<div className="flex flex-col w-full space-y-3 sm:w-1/2">
 								<Input
 									onChange={(e) => setRuasForm({ ...ruasForm, ruasName: e })}
 									label={"Ruas"}
@@ -313,7 +313,7 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 									name="Dokumen"
 								/>
 							</div>
-							<div className="flex flex-col w-1/2 space-y-3">
+							<div className="flex flex-col w-full space-y-3 sm:w-1/2">
 								<Input
 									onChange={(e) => setRuasForm({ ...ruasForm, longMiles: e })}
 									label={"Panjang (km)*"}
