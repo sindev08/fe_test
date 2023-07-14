@@ -26,7 +26,8 @@ export default function Login() {
 			if (result.status == 200) {
 				alert("Anda berhasil masuk");
 				setCookie("token", result?.data?.access_token, {
-					maxAge: result?.data?.expires_in,
+					// maxAge: result?.data?.expires_in,
+					maxAge: 3600,
 				});
 				replace("/");
 			} else {

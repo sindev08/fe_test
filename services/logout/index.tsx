@@ -1,11 +1,10 @@
 import axios from "axios";
-import { NextApiRequest } from "next";
 
-export default async function PostLogin(data: any) {
+export default async function PostLogout(data: any) {
 	try {
 		const result = await axios({
 			method: "POST",
-			url: process.env.NEXT_PUBLIC_BASE_URL + "/api/login",
+			url: process.env.NEXT_PUBLIC_BASE_URL + "/api/logout",
 			data,
 		});
 		return result;

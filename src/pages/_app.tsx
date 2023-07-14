@@ -2,6 +2,7 @@ import Head from "next/head";
 import { AppProps } from "next/app";
 import NextNProgress from "nextjs-progressbar";
 import "../styles/index.css";
+import { CustomToastContainer } from "../../components/Toast";
 
 function MyApp({ Component, pageProps }: AppProps) {
 	return (
@@ -18,6 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 				showOnShallow={true}
 			/>
 			<Component {...pageProps} />
+			<CustomToastContainer />
 		</>
 	);
 }
