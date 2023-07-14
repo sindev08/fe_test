@@ -3,4 +3,6 @@ interface Ruas {
 	longMiles: string;
 	initMiles: string;
 	lastMiles: string;
+	unit: any;
+	id?: any;
 }

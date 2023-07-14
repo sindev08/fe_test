@@ -27,6 +27,7 @@ import { notifyError } from "../../../components/Toast";
 import { UploadPdf } from "../../../components/UploadPdf";
 import { notifySuccess } from "../../../components/Toast";
 import CreateRuas from "../../../services/ruas/CreateRuas";
+import DeleteRuas from "../../../services/ruas/DeleteRuas";
 
 export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 	const token = ctx?.req?.cookies.token;
@@ -45,6 +46,7 @@ export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 export default function MasterData({ dataRuas, dataUnit, token }) {
 	const [modal, setModal] = useState(false);
 	const [action, setAction] = useState("add");
+
 	const [isImagePicked, setIsImagePicked] = useState(false);
 	const [isPdfPicked, setIsPdfPicked] = useState(false);
 
@@ -69,10 +71,13 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 		longMiles: "",
 		initMiles: "",
 		lastMiles: "",
+		unit: [],
+		id: "",
 	});
 
 	const handleAddRuas = async () => {
-		const unitIds = selected.map((unit) => unit.id); // Membuat array unitId
+		const unitIds = ruasForm.unit.map((units: any) => units.id); // Membuat array unitId
+		console.log(unitIds);
 		var formdata = new FormData();
 		formdata.append("unit_id", unitIds.join(","));
 		formdata.append("ruas_name", ruasForm.ruasName);
@@ -100,6 +105,17 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 			} else {
 				notifyError("Pastikan semuanya sudah terisi!");
 			}
+		}
+	};
+
+	const handleDelete = async (id: number) => {
+		const result = await DeleteRuas(token, id);
+		if (result) {
+			notifySuccess(result.message);
+			console.log(result);
+		} else {
+			notifyError(result.message);
+			console.log(result);
 		}
 	};
 
@@ -223,7 +239,17 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 															<button>
 																<EyeIcon className="w-5 h-5 text-brand" />
 															</button>
-															<button>
+															<button
+																onClick={(e) => {
+																	setRuasForm({
+																		...ruasForm,
+																		id: data.id,
+																		ruasName: data.ruas_name,
+																	}),
+																		setAction("delete"),
+																		setModal(true);
+																}}
+															>
 																<TrashIcon className="w-5 h-5 text-danger-500" />
 															</button>
 														</div>
@@ -273,11 +299,16 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 					</div>
 				</div>
 			</Layout>
-			<ModalAnimation showModal={modal} title={"Tambah Ruas"}>
+			<ModalAnimation
+				showModal={modal}
+				title={`${action === "add" ? "Tambah Ruas" : ""} ${
+					action === "delete" ? "Hapus Ruas" : ""
+				} ${action === "update" ? "Edit Ruas" : ""}`}
+			>
 				<button onClick={() => setModal(false)}>
 					<XMarkIcon className="w-5 h-5 text-gray-900" />
 				</button>
-				{action === "add" && (
+				{action === "add" ? (
 					<div className="flex flex-col h-[80vh] overflow-y-auto sm:h-full items-center justify-center p-4 space-y-5">
 						<div className="flex flex-col items-center justify-center w-full space-y-3 sm:space-y-0 sm:space-x-8 sm:flex-row">
 							<div className="flex flex-col w-full space-y-3 sm:w-1/2">
@@ -290,8 +321,10 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 									name={"Unit"}
 									labelFor={"Unit Kerja"}
 									selects={dataUnit.data}
-									selected={selected}
-									setSelected={setSelected}
+									selected={ruasForm.unit}
+									setSelected={(e: number) =>
+										setRuasForm({ ...ruasForm, unit: e })
+									}
 									max={1}
 								></Multiselect>
 								<UploadImage
@@ -343,7 +376,28 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 							<Button onClick={() => handleAddRuas()} text="Simpan" />
 						</div>
 					</div>
-				)}
+				) : action === "delete" ? (
+					<div className="flex flex-col h-[80vh] overflow-y-auto sm:h-full items-center justify-center p-4 space-y-5">
+						<div className="flex flex-col items-center justify-center py-8 space-y-8">
+							<TrashIcon className="w-16 h-16 text-danger-500" />
+							<p className="max-w-[18rem] text-xl leading-10 font-medium text-center">
+								Apakah Anda yakin ingin menghapus data{" "}
+								<span className="px-2 py-1 font-bold text-black rounded-sm bg-primary-100">
+									{ruasForm.ruasName}
+								</span>
+								?
+							</p>
+						</div>
+						<div className="flex justify-end w-full space-x-5">
+							<ButtonOutline onClick={() => setModal(false)} text="Kembali" />
+							<Button
+								type="danger"
+								onClick={() => handleDelete(ruasForm.id)}
+								text="Hapus"
+							/>
+						</div>
+					</div>
+				) : null}
 			</ModalAnimation>
 		</>
 	);
