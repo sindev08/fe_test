@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CheckCircleIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 
 interface MultiselectProps {
@@ -9,6 +9,7 @@ interface MultiselectProps {
 	selected: any;
 	setSelected: any;
 	max: number;
+	type?: string;
 }
 
 export const Multiselect = ({
@@ -19,16 +20,33 @@ export const Multiselect = ({
 	selected,
 	setSelected,
 	max,
+	type,
 }: MultiselectProps) => {
 	const [showDropdown, setShowDropdown] = useState(false);
+	const [selectsTemp, setSelectTemp] = useState(null);
+	useEffect(() => {
+		if (type === "edit") {
+			selects.map((selectName: any, i: number) =>
+				selected.find(
+					(select: any) =>
+						select.id == selectName.id && setSelectTemp(selectName)
+				)
+			);
+		}
+	}, [setSelectTemp, selectsTemp]);
+
 	const handleClickSelect = (value: any) => {
 		if (selected.find((select: any) => select.id == value.id)) {
 			setSelected(selected.filter((select: any) => select.id != value.id));
+			setSelectTemp(null);
+			console.log();
 		} else {
 			if (selected.length < max) {
 				setSelected([...selected, value]);
+				setSelectTemp(null);
 			} else {
 				setSelected([value]);
+				setSelectTemp(null);
 			}
 		}
 	};
@@ -49,7 +67,12 @@ export const Multiselect = ({
 					className="flex items-center justify-between w-full p-2 "
 				>
 					<span className="text-sm text-gray-900 capitalize">
-						{selected?.length > 0 ? selected[0].unit : "Pilih"}
+						{type == "edit" && selectsTemp
+							? selectsTemp?.unit
+							: selected?.length > 0
+							? selected[0].unit
+							: "Pilih"}
+						{/* {selected?.length > 0 ? selected[0].unit : "Pilih"} */}
 					</span>
 					{selected?.length > 0 ? (
 						<CheckCircleIcon className="w-6 h-6 text-brand" />

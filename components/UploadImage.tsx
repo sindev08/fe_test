@@ -9,6 +9,7 @@ interface UploadImageProps {
 	type: string;
 	fileImage: any;
 	name: string;
+	editFile?: string;
 }
 
 export function UploadImage({
@@ -18,6 +19,7 @@ export function UploadImage({
 	setIsImagePicked,
 	type,
 	name,
+	editFile,
 	fileImage,
 }: UploadImageProps) {
 	const fileInput = useRef(null);
@@ -49,10 +51,13 @@ export function UploadImage({
 					</div>
 				</div>
 			)}
-			{/* {isImagePicked && type == "add" && "file telah diupload"}
-				{!isImagePicked && type == "update" && "file untuk update"}
-				{isImagePicked && type == "update" && "file telah diganti"}
-				{isImagePicked && type == "add" && "file masih kosong"} */}
+			{!isImagePicked && type == "edit" && editFile.length > 0 && (
+				<div className="w-full p-2 border border-gray-200 rounded">
+					<div className="relative w-8 aspect-square">
+						<Image fill src={editFile} className="object-cover " alt="" />
+					</div>
+				</div>
+			)}
 			<input
 				id="dropzone-file"
 				type="file"

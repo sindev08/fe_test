@@ -5,4 +5,5 @@ interface Ruas {
 	lastMiles: string;
 	unit: any;
 	id?: any;
+	status?: string;
 }

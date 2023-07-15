@@ -9,6 +9,7 @@ interface UploadPdfProps {
 	type: string;
 	filePdf: any;
 	name: string;
+	editFile?: string;
 }
 
 export function UploadPdf({
@@ -19,6 +20,7 @@ export function UploadPdf({
 	type,
 	name,
 	filePdf,
+	editFile,
 }: UploadPdfProps) {
 	const fileInput = useRef(null);
 
@@ -37,7 +39,7 @@ export function UploadPdf({
 	return (
 		<div className="w-full file-uploader">
 			<label className="text-base font-medium text-gray-900">{name}</label>
-			{isPdfPicked && (
+			{(isPdfPicked || type === "edit") && (
 				<div className="w-full p-2 border border-gray-200 rounded">
 					<div className="relative w-8 aspect-square">
 						<DocumentIcon className="w-8 h-8 text-brand" />
