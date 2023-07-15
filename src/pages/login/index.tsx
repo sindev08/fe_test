@@ -6,6 +6,7 @@ import { Button } from "../../../components/Button";
 import PostLogin from "../../../services/login";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/router";
+import { notifyError, notifySuccess } from "../../../components/Toast";
 
 export default function Login() {
 	const [passwordShow, setPasswordShow] = useState(false);
@@ -24,14 +25,14 @@ export default function Login() {
 			data.append("password", password);
 			const result = await PostLogin(data);
 			if (result.status == 200) {
-				alert("Anda berhasil masuk");
+				notifySuccess("Anda berhasil masuk");
 				setCookie("token", result?.data?.access_token, {
 					// maxAge: result?.data?.expires_in,
 					maxAge: 3600,
 				});
 				replace("/");
 			} else {
-				alert("Username atau Password Anda salah!");
+				notifyError("Username atau Password Anda salah!");
 				console.log(result?.message);
 			}
 		}
