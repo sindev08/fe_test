@@ -2,7 +2,7 @@ import axios from "axios";
 import { NextApiRequest } from "next";
 
 export default async function GetAllRuas(
-	token: NextApiRequest,
+	token: string,
 	per_page: number,
 	page: number
 ) {

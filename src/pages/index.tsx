@@ -23,38 +23,64 @@ import {
 } from "@heroicons/react/24/solid";
 import { showModal } from "../../components/Modal";
 import axios from "axios";
-import { getCookie } from "cookies-next";
+import { useState } from "react";
+import { notifyError } from "../../components/Toast";
 
 export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 	const token = ctx?.req?.cookies.token;
-	const result = await GetAllUnitKerja(token);
-	const result2 = await GetAllRuas(token, 5, 2);
+	const result = await GetAllRuas(token, 5, 1);
+	const result2 = await GetAllUnitKerja(token);
 
 	return {
 		props: {
 			datas: result?.data,
-			datas2: result2?.data,
+			datasUnitKerja: result2?.data,
+			token: token,
 		},
 	};
 };
 
-export default function Home({ datas, datas2 }) {
+export default function Home({ datas, datasUnitKerja, token }) {
+	const [dataRuas, setDataRuas] = useState(datas);
+	const requestOptions = {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	};
+	const nextOrPrevPage = async (url: string) => {
+		try {
+			const response = await axios.get(url, requestOptions);
+			setDataRuas(response?.data);
+		} catch (error) {
+			notifyError("Gagal Request");
+		}
+	};
+
+	const selectPerPage = async (per_page: any) => {
+		try {
+			const response = await GetAllRuas(token, per_page, 1);
+			setDataRuas(response?.data);
+		} catch (error) {
+			notifyError("Gagal Request");
+		}
+	};
 	const data = {
-		labels: datas.data.map((data: any) => data.unit),
+		labels: datasUnitKerja.data.map((data: any) => data.unit),
 		datasets: [
 			{
 				label: "Data Unit",
-				data: datas.data.map((data: any) => data.status),
+				data: datasUnitKerja.data.map((data: any) => data.status),
 				backgroundColor: "rgba(25, 118, 210, 1)",
 			},
 		],
 	};
 	const dataPie = {
-		labels: datas.data.map((data: any) => data.unit),
+		labels: datasUnitKerja.data.map((data: any) => data.unit),
 		datasets: [
 			{
 				label: "# of Votes",
-				data: datas.data.map((data: any) => data.status),
+				data: datasUnitKerja.data.map((data: any) => data.status),
 				backgroundColor: [
 					"rgba(255, 99, 132, 0.6)",
 					"rgba(54, 162, 235, 0.6)",
@@ -74,22 +100,6 @@ export default function Home({ datas, datas2 }) {
 				borderWidth: 1,
 			},
 		],
-	};
-	const onClickPage = async (url: string) => {
-		try {
-			const result = await axios({
-				method: "GET",
-				url: url,
-				headers: {
-					Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-				},
-			});
-			console.log(result);
-
-			// return result;
-		} catch (err) {
-			return err;
-		}
 	};
 	return (
 		<>
@@ -138,7 +148,7 @@ export default function Home({ datas, datas2 }) {
 									</tr>
 								</thead>
 								<tbody>
-									{datas2?.data?.map((data: any, i: number) => (
+									{dataRuas?.data?.map((data: any, i: number) => (
 										<tr key={i}>
 											<td className="p-4 text-center">{i + 1}</td>
 											<td className="p-4 text-center">{data.ruas_name}</td>
@@ -179,8 +189,9 @@ export default function Home({ datas, datas2 }) {
 						</div>
 						<div className="flex items-center justify-end w-full mt-6 space-x-10 ">
 							<select
-								value={datas2?.per_page}
+								defaultValue={dataRuas?.per_page}
 								className="px-3 py-2 border-2 rounded border-brand focus:outline-none"
+								onChange={(e) => selectPerPage(e.target.value)}
 							>
 								{[5, 10, 20].map((pageSize) => (
 									<option key={pageSize} value={pageSize}>
@@ -189,9 +200,9 @@ export default function Home({ datas, datas2 }) {
 								))}
 							</select>
 							<div className="flex items-center space-x-2.5">
-								{datas2?.prev_page_url && (
+								{dataRuas?.prev_page_url && (
 									<button
-										onClick={() => onClickPage(datas2?.prev_page_url)}
+										onClick={() => nextOrPrevPage(dataRuas?.prev_page_url)}
 										className={`px-3 py-2 bg-white border-2 rounded border-brand`}
 									>
 										<ChevronLeftIcon className="w-5 h-5 text-brand" />
@@ -200,11 +211,11 @@ export default function Home({ datas, datas2 }) {
 								<button
 									className={`px-3 py-2 bg-white border-2 rounded border-brand`}
 								>
-									{datas2?.current_page}
+									{dataRuas?.current_page}
 								</button>
-								{datas2?.next_page_url && (
+								{dataRuas?.next_page_url && (
 									<button
-										onClick={() => onClickPage(datas2?.next_page_url)}
+										onClick={() => nextOrPrevPage(dataRuas?.next_page_url)}
 										className={`px-3 py-2 bg-white border-2 rounded border-brand`}
 									>
 										<ChevronRightIcon className="w-5 h-5 text-brand" />

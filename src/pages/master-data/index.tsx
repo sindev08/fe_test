@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Navbar } from "../../../components/Navbar";
 import { Layout } from "../../../components/Layout";
 import { GetServerSideProps } from "next";
@@ -38,14 +38,38 @@ export const getServerSideProps: GetServerSideProps<{}> = async (ctx: any) => {
 
 	return {
 		props: {
-			dataRuas: result?.data,
+			datas: result?.data,
 			dataUnit: result2?.data,
 			token: token,
 		},
 	};
 };
 
-export default function MasterData({ dataRuas, dataUnit, token }) {
+export default function MasterData({ datas, dataUnit, token }) {
+	const [dataRuas, setDataRuas] = useState(datas);
+	const requestOptions = {
+		method: "GET",
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	};
+	const nextOrPrevPage = async (url: string) => {
+		try {
+			const response = await axios.get(url, requestOptions);
+			setDataRuas(response?.data);
+		} catch (error) {
+			notifyError("Gagal Request");
+		}
+	};
+	const selectPerPage = async (per_page: any) => {
+		try {
+			const response = await GetAllRuas(token, per_page, 1);
+			setDataRuas(response?.data);
+		} catch (error) {
+			notifyError("Gagal Request");
+		}
+	};
+
 	const [modal, setModal] = useState(false); // state ini digunakan untuk menampilkan/menutup popup modal
 	const [action, setAction] = useState(""); // state ini digunakan untuk mengganti tipe aksi seperti tambah, update dan hapus data
 	const [isImagePicked, setIsImagePicked] = useState(false); // state ini digunakan untuk menampung file image
@@ -170,23 +194,6 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 			console.log(result);
 		}
 	};
-
-	const onClickPage = async (url: string) => {
-		try {
-			const result = await axios({
-				method: "GET",
-				url: url,
-				headers: {
-					Authorization: `Bearer ${process.env.NEXT_PUBLIC_TOKEN}`,
-				},
-			});
-			console.log(result);
-
-			// return result;
-		} catch (err) {
-			return err;
-		}
-	};
 	return (
 		<>
 			<Navbar />
@@ -246,9 +253,11 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 												<th className="p-4 font-medium text-center text-white">
 													Status
 												</th>
-												<th className="p-4 font-medium text-center text-white">
-													Aksi
-												</th>
+												{dataRuas && (
+													<th className="p-4 font-medium text-center text-white">
+														Aksi
+													</th>
+												)}
 											</tr>
 										</thead>
 										<tbody>
@@ -309,14 +318,31 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 																			pdf: data.doc_url,
 																			image: data.photo_url,
 																		});
-																	// 	setFileImage(data.photo_url);
-																	// setFilePdf(data.doc_url);
 																	setAction("edit"), setModal(true);
 																}}
 															>
 																<PencilSquareIcon className="w-5 h-5 text-orange-500" />
 															</button>
-															<button>
+															<button
+																onClick={(e) => {
+																	setRuasForm({
+																		...ruasForm,
+																		id: data.id,
+																		ruasName: data.ruas_name,
+																		status: data.status,
+																		longMiles: data.long,
+																		initMiles: data.km_awal,
+																		lastMiles: data.km_akhir,
+																		unit: [{ id: data.unit_id, unit: "" }],
+																	}),
+																		setEditFile({
+																			...editFile,
+																			pdf: data.doc_url,
+																			image: data.photo_url,
+																		});
+																	setAction("edit"), setModal(true);
+																}}
+															>
 																<EyeIcon className="w-5 h-5 text-brand" />
 															</button>
 															<button
@@ -341,8 +367,9 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 								</div>
 								<div className="flex items-center justify-end w-full mt-6 space-x-10 ">
 									<select
-										value={dataRuas?.per_page}
+										defaultValue={dataRuas?.per_page}
 										className="px-3 py-2 border-2 rounded border-brand focus:outline-none"
+										onChange={(e) => selectPerPage(e.target.value)}
 									>
 										{[5, 10, 20].map((pageSize) => (
 											<option key={pageSize} value={pageSize}>
@@ -353,7 +380,7 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 									<div className="flex items-center space-x-2.5">
 										{dataRuas?.prev_page_url && (
 											<button
-												onClick={() => onClickPage(dataRuas?.prev_page_url)}
+												onClick={() => nextOrPrevPage(dataRuas?.prev_page_url)}
 												className={`px-3 py-2 bg-white border-2 rounded border-brand`}
 											>
 												<ChevronLeftIcon className="w-5 h-5 text-brand" />
@@ -366,7 +393,7 @@ export default function MasterData({ dataRuas, dataUnit, token }) {
 										</button>
 										{dataRuas?.next_page_url && (
 											<button
-												onClick={() => onClickPage(dataRuas?.next_page_url)}
+												onClick={() => nextOrPrevPage(dataRuas?.next_page_url)}
 												className={`px-3 py-2 bg-white border-2 rounded border-brand`}
 											>
 												<ChevronRightIcon className="w-5 h-5 text-brand" />

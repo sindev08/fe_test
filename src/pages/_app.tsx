@@ -3,7 +3,6 @@ import { AppProps } from "next/app";
 import NextNProgress from "nextjs-progressbar";
 import "../styles/index.css";
 import { CustomToastContainer } from "../../components/Toast";
-import CookieWatcher from "../../components/CookieWatcher";
 import { useEffect } from "react";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/router";
